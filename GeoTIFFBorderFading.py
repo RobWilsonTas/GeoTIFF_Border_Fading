@@ -9,8 +9,8 @@ User options for the tiling section
 """
 
 #Initial variable assignment
-rootProcessDirectory    = 'D:/Other Tasks/7. Image Border Fading/' #E.g 'C:/Temp/'
-inImage                 = 'D:/Other Tasks/7. Image Border Fading/E BarnesBay10cm2024MatchedSharpened.tif' #E.g 'C:/Temp/BigImage.tif'
+rootProcessDirectory    = 'C:/Image Border Fading/' #E.g 'C:/Temp/'
+inImage                 = 'C:/Image Border Fading/YourImage.tif' #E.g 'C:/Temp/BigImage.tif'
 fadeDistance            = 128 #Number of pixels to fade the border by. Ensure this is an int greater than 0
 
 
