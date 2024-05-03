@@ -12,6 +12,7 @@ User options for the tiling section
 rootProcessDirectory    = 'C:/Image Border Fading/' #E.g 'C:/Temp/'
 inImage                 = 'C:/Image Border Fading/YourImage.tif' #E.g 'C:/Temp/BigImage.tif'
 fadeDistance            = 128 #Number of pixels to fade the border by. Ensure this is an int greater than 0
+editFadeBoundary        = True #Whether you want the process to stop to allow you to edit which sides of the raster you want to fade
 
 
 #Options for compressing the images, ZSTD gives the best speed but LZW allows you to view the thumbnail in windows explorer
@@ -71,15 +72,26 @@ processing.run("native:buffer", {'INPUT':processDirectory + 'ExtentFixFilt.gpkg'
 #Convert the polygon to lines
 processing.run("native:polygonstolines", {'INPUT':processDirectory + 'ExtentFixFiltBuffer.gpkg','OUTPUT':processDirectory + 'ExtentFixFiltBufferLines.gpkg'})
 
+#If you've opted to edit the fade boundary then there is a prompt to do so
+if editFadeBoundary:
+    box = QMessageBox()
+    box.setIcon(QMessageBox.Question)
+    box.setWindowTitle("Ok time to do edits")
+    box.setText("The boundary lines have been created, so open up\n\n" + processDirectory + "ExtentFixFiltBufferLines.gpkg\n\nin a separate instance of QGIS, edit the lines, then save them.\n\nOnce you're done hit 'Good to go'.")
+    box.setStandardButtons(QMessageBox.Yes)
+    buttonY = box.button(QMessageBox.Yes)
+    buttonY.setText('Good to go')
+    box.exec_()
+
 #Rasterise these lines
 processing.run("gdal:rasterize", {'INPUT':processDirectory + 'ExtentFixFiltBufferLines.gpkg','FIELD':'','BURN':1,'UNITS':1,'WIDTH':pixelSizeX,'HEIGHT':pixelSizeY,'EXTENT':rasExtent,
     'NODATA':None,'OPTIONS':compressOptions,'DATA_TYPE':0,'INIT':None,'INVERT':False,'EXTRA':'','OUTPUT':processDirectory + 'ExtentFixFiltBufferLinesRasterize.tif'})
 
+#Create a euclidean distance raster
 processing.run("gdal:proximity", {'INPUT':processDirectory + 'ExtentFixFiltBufferLinesRasterize.tif','BAND':1,'VALUES':'1','UNITS':1,'MAX_DISTANCE':fadeDistance,'REPLACE':None,'NODATA':fadeDistance,
     'OPTIONS':compressOptions,'EXTRA':'','DATA_TYPE':0,'OUTPUT':processDirectory + 'ExtentFixFiltBufferLinesRasterizeDistance.tif'})
 
-#Change this to have values betwe
-#Create a euclidean distance rasteren 0 and 255ish
+#Change this to have values between 0 and 255ish
 processing.run("gdal:rastercalculator", {'INPUT_A':processDirectory + 'ExtentFixFiltBufferLinesRasterizeDistance.tif','BAND_A':1,'INPUT_B':processDirectory + 'AlphaClean.tif','BAND_B':1
     ,'FORMULA':'(A.astype(numpy.float64) * ' + str(multiplyTo255) + ') * (B>127)','RTYPE':2,'NO_DATA':-1,'OPTIONS':compressOptions,'EXTRA':'','OUTPUT':processDirectory + 'NewAlphaBand.tif'})
  
