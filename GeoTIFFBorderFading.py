@@ -6,7 +6,7 @@ startTime = time.time()
 
 """
 ##########################################################
-User options for the tiling section
+User options
 """
 
 #Initial variable assignment
