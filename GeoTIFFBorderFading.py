@@ -1,4 +1,5 @@
 import time
+from pathlib import Path
 from datetime import datetime
 startTime = time.time()
 
@@ -9,9 +10,8 @@ User options for the tiling section
 """
 
 #Initial variable assignment
-rootProcessDirectory    = 'C:/Image Border Fading/' #E.g 'C:/Temp/'
-inImage                 = 'C:/Image Border Fading/YourImage.tif' #E.g 'C:/Temp/BigImage.tif'
-fadeDistance            = 128 #Number of pixels to fade the border by. Ensure this is an int greater than 0
+inImage                 = 'C:/Temp/YourImage.tif' #E.g 'C:/Temp/BigImage.tif'
+fadeDistance            = 200 #Number of pixels to fade the border by. Ensure this is an int greater than 0
 editFadeBoundary        = True #Whether you want the process to stop to allow you to edit which sides of the raster you want to fade
 
 
@@ -36,6 +36,9 @@ inImageName = inImageName[:len(inImageName)-4]
 outImageName = inImageName
 
 #Making a folder for processing
+
+#Making a folder for processing
+rootProcessDirectory = str(Path(inImage).parent.absolute()).replace('\\','/') + '/'
 processDirectory = rootProcessDirectory + inImageName + 'FadeProcess' + '/'
 if not os.path.exists(processDirectory):        os.mkdir(processDirectory)
 
@@ -89,7 +92,7 @@ processing.run("gdal:rasterize", {'INPUT':processDirectory + 'ExtentFixFiltBuffe
 
 #Create a euclidean distance raster
 processing.run("gdal:proximity", {'INPUT':processDirectory + 'ExtentFixFiltBufferLinesRasterize.tif','BAND':1,'VALUES':'1','UNITS':1,'MAX_DISTANCE':fadeDistance,'REPLACE':None,'NODATA':fadeDistance,
-    'OPTIONS':compressOptions,'EXTRA':'','DATA_TYPE':0,'OUTPUT':processDirectory + 'ExtentFixFiltBufferLinesRasterizeDistance.tif'})
+    'OPTIONS':compressOptions,'EXTRA':'','DATA_TYPE':1,'OUTPUT':processDirectory + 'ExtentFixFiltBufferLinesRasterizeDistance.tif'})
 
 #Change this to have values between 0 and 255ish
 processing.run("gdal:rastercalculator", {'INPUT_A':processDirectory + 'ExtentFixFiltBufferLinesRasterizeDistance.tif','BAND_A':1,'INPUT_B':processDirectory + 'AlphaClean.tif','BAND_B':1
