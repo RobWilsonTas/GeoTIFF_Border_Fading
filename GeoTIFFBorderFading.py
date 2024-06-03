@@ -36,8 +36,6 @@ inImageName = inImageName[:len(inImageName)-4]
 outImageName = inImageName
 
 #Making a folder for processing
-
-#Making a folder for processing
 rootProcessDirectory = str(Path(inImage).parent.absolute()).replace('\\','/') + '/'
 processDirectory = rootProcessDirectory + inImageName + 'FadeProcess' + '/'
 if not os.path.exists(processDirectory):        os.mkdir(processDirectory)
