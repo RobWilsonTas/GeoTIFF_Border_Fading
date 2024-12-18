@@ -11,14 +11,14 @@ User options
 
 #Initial variable assignment
 inImage                 = 'C:/Temp/YourImage.tif' #E.g 'C:/Temp/BigImage.tif'
-fadeDistance            = 200 #Number of pixels to fade the border by. Ensure this is an int greater than 0
+fadeDistance            = 300 #Number of pixels to fade the border by. Ensure this is an int greater than 0
 editFadeBoundary        = True #Whether you want the process to stop to allow you to edit which sides of the raster you want to fade
 
 
 #Options for compressing the images, ZSTD gives the best speed but LZW allows you to view the thumbnail in windows explorer
 compressOptions =       'COMPRESS=ZSTD|NUM_THREADS=ALL_CPUS|PREDICTOR=1|ZSTD_LEVEL=1|BIGTIFF=IF_SAFER|TILED=YES'
 finalCompressOptions =  'COMPRESS=LZW|PREDICTOR=2|NUM_THREADS=ALL_CPUS|BIGTIFF=IF_SAFER|TILED=YES|PHOTOMETRIC=RGB'
-gdalOptions =           '--config GDAL_NUM_THREADS ALL_CPUS -overwrite'
+gdalOptions =           ''
 
 
 """
@@ -34,6 +34,7 @@ inImageName = inImage.split("/")
 inImageName = inImageName[-1]
 inImageName = inImageName[:len(inImageName)-4]
 outImageName = inImageName
+
 
 #Making a folder for processing
 rootProcessDirectory = str(Path(inImage).parent.absolute()).replace('\\','/') + '/'
@@ -116,7 +117,7 @@ processing.run("gdal:buildvirtualraster", {'INPUT':[processDirectory + 'Band1Vir
 
 #Render out the vrt as a final image
 processing.run("gdal:warpreproject", {'INPUT':processDirectory + 'Band123A.vrt','SOURCE_CRS':None,'TARGET_CRS':None,'RESAMPLING':0,'NODATA':None,'TARGET_RESOLUTION':None,
-'OPTIONS':finalCompressOptions,'DATA_TYPE':0,'TARGET_EXTENT':None,'TARGET_EXTENT_CRS':None,'MULTITHREADING':True,'EXTRA':gdalOptions + ' -srcalpha -dstalpha','OUTPUT':rootProcessDirectory + inImageName + 'Faded.tif'})
+    'OPTIONS':finalCompressOptions,'DATA_TYPE':0,'TARGET_EXTENT':None,'TARGET_EXTENT_CRS':None,'MULTITHREADING':True,'EXTRA':'-srcalpha -dstalpha','OUTPUT':rootProcessDirectory + inImageName + 'Faded.tif'})
 
 #Build pyramid layers so that you can browse easily
 processing.run("gdal:overviews", {'INPUT':rootProcessDirectory + inImageName + 'Faded.tif','CLEAN':False,'LEVELS':'','RESAMPLING':0,'FORMAT':1,'EXTRA':'--config COMPRESS_OVERVIEW JPEG'})
